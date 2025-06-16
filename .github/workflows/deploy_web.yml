@@ -1,4 +1,7 @@
 name: Deploy Flutter Web to GitHub Pages
+permissions:
+  contents: write    # даёт GITHUB_TOKEN право пушить файлы
+  pages: write       # понадобится, если вы используете GitHub Pages API
 on:
   push:
     branches:
