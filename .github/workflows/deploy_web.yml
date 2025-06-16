@@ -1,45 +1,53 @@
 name: Deploy Flutter Web to GitHub Pages
 
-# даём GITHUB_TOKEN право пушить и работать с Pages
+# Дадим GITHUB_TOKEN нужные права
 permissions:
-  contents: write
-  pages: write
+  id-token: write      # Нужно для actions/deploy-pages
+  pages: write         # Нужно для публикации Pages
 
 on:
   push:
     branches:
-      - main
+      - main          # Срабатывает при пуше в main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # 1. Забираем код
+      # 1) Забираем код
       - uses: actions/checkout@v4
 
-      # 2. Устанавливаем Flutter
+      # 2) Устанавливаем Flutter SDK
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.2'
 
-      # 3. Собираем Web
+      # 3) Включаем поддержку Web
+      - name: Enable web support
+        run: flutter config --enable-web
+
+      # 4) Получаем зависимости
+      - name: Get dependencies
+        run: flutter pub get
+
+      # 5) Собираем release-версию Web
       - name: Build Flutter Web
         run: flutter build web --release
 
-      # === Новая часть для GitHub Pages ===
+      # ==== Далее — стандартные шаги для GitHub Pages ==== 
 
-      # 4. Конфигурируем Pages
+      # 6) Конфигурируем Pages (резервирует место для артефактов)
       - name: Configure Pages
         uses: actions/configure-pages@v3
 
-      # 5. Аплоадим артефакты сборки
+      # 7) Загружаем только что собранные файлы как артефакт
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: build/web
 
-      # 6. Деплоим на Pages
+      # 8) Деплоим этот артефакт на GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
-
